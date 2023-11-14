@@ -57,6 +57,29 @@
 			<scope>runtime</scope>
 		</dependency>
 
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>io.opentelemetry</groupId>
+			<artifactId>opentelemetry-api</artifactId>
+			<version>1.24.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-tracing-bridge-otel</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.sap.hcp.cf.logging</groupId>
+			<artifactId>cf-java-logging-support-opentelemetry-agent-extension</artifactId>
+			<version>${cf-java-logging-support.version}</version>
+		</dependency>
+
+
 		<!-- CLOUD SDK dependencies -->
 		<dependency>
 			<groupId>com.sap.cloud.sdk.cloudplatform</groupId>

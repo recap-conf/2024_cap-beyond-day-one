@@ -2,23 +2,34 @@ package my.bookshop.handlers;
 
 import static cds.gen.adminservice.AdminService_.ORDERS;
 
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.springframework.stereotype.Component;
 
+import com.sap.cds.CdsException;
 import com.sap.cds.ql.Select;
 import com.sap.cds.ql.cqn.CqnDelete;
 import com.sap.cds.services.EventContext;
+import com.sap.cds.services.auditlog.Access;
 import com.sap.cds.services.auditlog.Action;
+import com.sap.cds.services.auditlog.Attribute;
 import com.sap.cds.services.auditlog.AuditLogService;
 import com.sap.cds.services.auditlog.ChangedAttribute;
 import com.sap.cds.services.auditlog.ConfigChange;
 import com.sap.cds.services.auditlog.DataObject;
+import com.sap.cds.services.auditlog.DataSubject;
 import com.sap.cds.services.auditlog.KeyValuePair;
 import com.sap.cds.services.cds.CdsDeleteEventContext;
+import com.sap.cds.services.cds.CdsReadEventContext;
 import com.sap.cds.services.cds.CqnService;
 import com.sap.cds.services.handler.EventHandler;
 import com.sap.cds.services.handler.annotations.Before;
@@ -43,6 +54,36 @@ class AdminServiceAuditHandler implements EventHandler {
 	AdminServiceAuditHandler(PersistenceService db, AuditLogService auditLog) {
 		this.db = db;
 		this.auditLog = auditLog;
+	}
+
+	@Before(event = { CqnService.EVENT_READ }, entity = { Orders_.CDS_NAME })
+	public void beforeRead(CdsReadEventContext context) {
+		System.out.println("Custom handler");
+
+		HttpGet get = new HttpGet("http://www.sap.com");
+		try(CloseableHttpClient httpClient = HttpClients.createDefault()) {
+			HttpResponse response = httpClient.execute(get);
+			System.out.println("Status code: " + response.getStatusLine().getStatusCode());
+		} catch(IOException e) {
+			throw new CdsException(e);
+		}
+
+		Access access = Access.create();
+		KeyValuePair pair = KeyValuePair.create();
+		pair.setKeyName("key1");
+		pair.setValue("value1");
+		DataSubject subject = DataSubject.create();
+		subject.setType("a");
+		subject.setId(Collections.singletonList(pair));
+		access.setDataSubject(subject);
+		DataObject dObject = DataObject.create();
+		dObject.setType("b");
+		dObject.setId(Collections.singletonList(pair));
+		access.setDataObject(dObject);
+		Attribute attr = Attribute.create();
+		attr.setName("attr1");
+		access.setAttributes(Collections.singletonList(attr));
+		auditLog.logDataAccess(access);
 	}
 
 	@Before(event = { CqnService.EVENT_CREATE })
