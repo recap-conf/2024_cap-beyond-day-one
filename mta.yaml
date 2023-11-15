@@ -27,7 +27,7 @@ modules:
     requires:
       - name: bookshop-hdi-container-otel
       - name: bookshop-uaa-otel
-      - name: cf-logging
+      - name: bookshop-cloud-logging
     provides:
       - name: srv-api
         properties:
@@ -89,8 +89,5 @@ resources:
     parameters:
       service: hana
       service-plan: hdi-shared
-  - name: cf-logging
-    type: org.cloudfoundry.managed-service
-    parameters:
-      service: application-logs
-      service-plan: lite
+  - name: bookshop-cloud-logging
+    type: org.cloudfoundry.existing-service
