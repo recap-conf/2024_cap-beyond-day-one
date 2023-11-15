@@ -35,7 +35,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: "health"
+        include: "health, metrics, beans"
   health:
     defaults.enabled: false
     ping.enabled: true
