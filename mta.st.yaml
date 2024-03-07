@@ -18,13 +18,9 @@ modules:
         SPRING_PROFILES_ACTIVE: cloud,sandbox
         JBP_CONFIG_COMPONENTS: "jres: ['com.sap.xs.java.buildpack.jre.SAPMachineJRE']"
         JBP_CONFIG_SAP_MACHINE_JRE: '{ version: 17.+ }'
-        #JBP_CONFIG_JAVA_OPTS: "[from_environment: false, java_opts: '-javaagent:META-INF/.sap_java_buildpack/otel_agent/opentelemetry-javaagent.jar -Dotel.javaagent.extensions=BOOT-INF/lib/cf-java-logging-support-opentelemetry-agent-extension-3.8.0.jar -Dotel.instrumentation.jdbc-datasource.enabled=true']"
-        #OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
-        #OTEL_EXPORTER: none
-        JBP_CONFIG_JAVA_OPTS: "[from_environment: false, java_opts: '-Dotel.java.global-autoconfigure.enabled=true']"
-        OTEL_EXPORTER_OTLP_ENDPOINT: https://apm.cf.sap.hana.ondemand.com/e/35b0da2c-16be-47e5-9f33-f6d699cd4614/api/v2/otlp
-        OTEL_EXPORTER_OTLP_HEADERS: Authorization=Api-Token dt0c01.WA4MG7ARSARECDJUOOAVOFIT.YZWDHGZZJ7H34GT6QVXKGZ7KJC3WNXQ5OTTOKXXLIOGKA4W2BU24VOUNJ2OAZCRM
-        OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE: DELTA
+        JBP_CONFIG_JAVA_OPTS: "[from_environment: false, java_opts: '-Dotel.javaagent.extension.sap.cf.binding.dynatrace.metrics.token-name=metrics_token -javaagent:META-INF/.sap_java_buildpack/otel_agent/opentelemetry-javaagent.jar -Dotel.javaagent.extensions=BOOT-INF/lib/cf-java-logging-support-opentelemetry-agent-extension-3.8.2.jar']"
+        OTEL_METRICS_EXPORTER: cloud-logging,dynatrace
+        OTEL_TRACES_EXPORTER: cloud-logging
     build-parameters:
       builder: custom
       commands:
@@ -33,8 +29,8 @@ modules:
     requires:
       - name: bookshop-hdi-container-otel
       - name: bookshop-uaa-otel
-      - name: dynatrace #bookshop-cloud-logging
-      - name: bookshop-auditlog-audit
+      - name: dynatrace
+      - name: bookshop-cloud-logging
     provides:
       - name: srv-api
         properties:
@@ -96,7 +92,7 @@ resources:
     parameters:
       service: hana
       service-plan: hdi-shared
-  - name: dynatrace #bookshop-cloud-logging
+  - name: dynatrace
     type: org.cloudfoundry.existing-service
-  - name: bookshop-auditlog-audit  #bookshop-cloud-logging
+  - name: bookshop-cloud-logging
     type: org.cloudfoundry.existing-service

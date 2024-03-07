@@ -8,6 +8,16 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.sap.cds.services.auditlog.AuditLogService;
+import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.metrics.LongCounter;
+import io.opentelemetry.api.metrics.Meter;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.context.Scope;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -64,6 +74,11 @@ class CatalogServiceHandler implements EventHandler {
 	private final FeatureTogglesInfo featureToggles;
 	private final RatingCalculator ratingCalculator;
 	private final CqnAnalyzer analyzer;
+	private final Tracer tracer = GlobalOpenTelemetry.getTracerProvider().tracerBuilder("RatingCalculator").build();
+	private final Meter meter = GlobalOpenTelemetry.getMeterProvider().meterBuilder("RatingCalculator").build();
+
+	@Autowired
+	AuditLogService auditLog;
 
 	CatalogServiceHandler(PersistenceService db, @Qualifier(ReviewService_.CDS_NAME) DraftService reviewService,
 			Messages messages, FeatureTogglesInfo featureToggles, RatingCalculator ratingCalculator, CdsModel model) {
@@ -128,7 +143,22 @@ class CatalogServiceHandler implements EventHandler {
 	 */
 	@After(entity = Books_.CDS_NAME)
 	public void afterAddReview(AddReviewContext context) {
-		ratingCalculator.setBookRating(context.getResult().getBookId());
+		Span childSpan = tracer.spanBuilder("setBookRating").startSpan();
+		childSpan.setAttribute("book.title", context.getResult().getTitle());
+		childSpan.setAttribute("book.id", context.getResult().getBookId());
+		childSpan.setAttribute("book.rating", context.getResult().getRating());
+
+		try(Scope scope = childSpan.makeCurrent()) {
+			ratingCalculator.setBookRating(context.getResult().getBookId());
+		} catch (Throwable t) {
+			childSpan.recordException(t);
+			throw t;
+		} finally {
+			childSpan.end();
+		}
+
+		LongCounter counter = meter.counterBuilder("reviewCounter").setDescription("Counts the number of reviews created per book").build();
+		counter.add(1, Attributes.of(AttributeKey.stringKey("bookId"), context.getResult().getBookId()));
 	}
 
 	@After(event = CqnService.EVENT_READ)
