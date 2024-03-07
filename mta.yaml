@@ -1,0 +1,98 @@
+_schema-version: '2.1'
+ID: bookshop
+version: 1.0.0
+description: "Bookshop CAP Java Project with UI"
+parameters:
+  enable-parallel-deployments: true
+modules:
+# --------------------- SERVER MODULE ------------------------
+  - name: bookshop-srv-otel
+# ------------------------------------------------------------
+    type: java
+    path: srv
+    parameters:
+      memory: 1024M
+      disk-quota: 512M
+      buildpack: sap_java_buildpack
+    properties:
+        SPRING_PROFILES_ACTIVE: cloud,sandbox
+        JBP_CONFIG_COMPONENTS: "jres: ['com.sap.xs.java.buildpack.jre.SAPMachineJRE']"
+        JBP_CONFIG_SAP_MACHINE_JRE: '{ version: 17.+ }'
+        JBP_CONFIG_JAVA_OPTS: "[from_environment: false, java_opts: '-Dotel.javaagent.extension.sap.cf.binding.dynatrace.metrics.token-name=metrics_token -javaagent:META-INF/.sap_java_buildpack/otel_agent/opentelemetry-javaagent.jar -Dotel.javaagent.extensions=BOOT-INF/lib/cf-java-logging-support-opentelemetry-agent-extension-3.8.2.jar']"
+        OTEL_METRICS_EXPORTER: cloud-logging,dynatrace
+        OTEL_TRACES_EXPORTER: cloud-logging
+    build-parameters:
+      builder: custom
+      commands:
+        - mvn clean package -DskipTests=true
+      build-result: target/*-exec.jar
+    requires:
+      - name: bookshop-hdi-container-otel
+      - name: bookshop-uaa-otel
+      - name: dynatrace
+      - name: bookshop-cloud-logging
+    provides:
+      - name: srv-api
+        properties:
+          srv-url: '${default-url}'
+# --------------------- DB MODULE ---------------------------
+  - name: bookshop-db-otel
+# -----------------------------------------------------------
+    type: hdb
+    path: db
+    parameters:
+      buildpack: nodejs_buildpack
+    build-parameters:
+      builder: custom
+      commands:
+        - npm run build
+      requires:
+        - name: bookshop-srv-otel
+    requires:
+      - name: bookshop-hdi-container-otel
+# --------------------- APPROUTER MODULE ---------------------
+  - name: bookshop-app-otel
+# ------------------------------------------------------------
+    type: approuter.nodejs
+    path: app
+    parameters:
+      memory: 256M
+      disk-quota: 512M
+    requires:
+    - name: srv-api
+      group: destinations
+      properties:
+        name: backend
+        url: ~{srv-url}
+        forwardAuthToken: true
+        strictSSL: true
+    - name: bookshop-uaa-otel
+    provides:
+      - name: app-api
+        properties:
+          app-url: '${default-url}'
+# --------------------- RESOURCES ---------------------
+resources:
+# -----------------------------------------------------
+  - name: bookshop-uaa-otel
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: xsuaa
+      service-plan: application
+      path: ./xs-security.json
+      config: # override xsappname as it needs to be unique
+        xsappname: bookshop-otel
+        oauth2-configuration:
+          redirect-uris:
+          - ~{app-api/app-url}/**
+    requires:
+      - name: app-api
+  - name: bookshop-hdi-container-otel
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: hana
+      service-plan: hdi-shared
+  - name: dynatrace
+    type: org.cloudfoundry.existing-service
+  - name: bookshop-cloud-logging
+    type: org.cloudfoundry.existing-service
