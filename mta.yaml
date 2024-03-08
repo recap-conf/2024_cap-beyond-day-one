@@ -4,6 +4,11 @@ version: 1.0.0
 description: "Bookshop CAP Java Project with UI"
 parameters:
   enable-parallel-deployments: true
+build-parameters:
+  before-all:
+    - builder: custom
+      commands:
+        - npm run build-bupa
 modules:
 # --------------------- SERVER MODULE ------------------------
   - name: bookshop-srv-otel
@@ -29,8 +34,8 @@ modules:
     requires:
       - name: bookshop-hdi-container-otel
       - name: bookshop-uaa-otel
-      - name: dynatrace
-      - name: bookshop-cloud-logging
+      - name: cdsnode-dynatrace
+      - name: cdsnode-cloud-logging
     provides:
       - name: srv-api
         properties:
@@ -50,6 +55,30 @@ modules:
         - name: bookshop-srv-otel
     requires:
       - name: bookshop-hdi-container-otel
+# --------------------- BUPA SERVER MODULE -------------------
+  - name: bupa-srv-otel
+# ------------------------------------------------------------
+    type: nodejs
+    path: bupa/gen/srv
+    parameters:
+      buildpack: nodejs_buildpack
+    build-parameters:
+      builder: npm
+    provides:
+      - name: bupa-srv-api
+        properties:
+          srv-url: ${default-url}
+    requires:
+      - name: bupa-hdi-container-otel
+# --------------------- BUPA DB MODULE ----------------------
+  - name: bupa-db-otel
+# -----------------------------------------------------------
+    type: hdb
+    path: bupa/gen/db
+    parameters:
+      buildpack: nodejs_buildpack
+    requires:
+      - name: bupa-hdi-container-otel
 # --------------------- APPROUTER MODULE ---------------------
   - name: bookshop-app-otel
 # ------------------------------------------------------------
@@ -92,7 +121,12 @@ resources:
     parameters:
       service: hana
       service-plan: hdi-shared
-  - name: dynatrace
+  - name: bupa-hdi-container-otel
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: hana
+      service-plan: hdi-shared
+  - name: cdsnode-dynatrace
     type: org.cloudfoundry.existing-service
-  - name: bookshop-cloud-logging
+  - name: cdsnode-cloud-logging
     type: org.cloudfoundry.existing-service
