@@ -55,6 +55,19 @@ cds:
 
 ---
 spring:
+  config.activate.on-profile: cap-node
+cds:
+  remote.services:
+    '[API_BUSINESS_PARTNER]':
+      destination:
+        type: "odata-v2"
+        properties:
+          url: "https://sandbox.api.sap.com/s4hanacloud/sap/opu/odata/sap"
+        headers:
+          Authorization: "YWRtaW46YWRtaW4=" # admin:admin
+
+---
+spring:
   config.activate.on-profile: sandbox
 cds:
   remote.services:
