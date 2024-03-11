@@ -62,7 +62,7 @@ cds:
       destination:
         type: "odata-v2"
         properties:
-          url: "https://sandbox.api.sap.com/s4hanacloud/sap/opu/odata/sap"
+          url: "https://localhost:8080/"
         headers:
           Authorization: "YWRtaW46YWRtaW4=" # admin:admin
 
