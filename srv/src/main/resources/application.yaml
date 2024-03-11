@@ -56,15 +56,14 @@ cds:
 ---
 spring:
   config.activate.on-profile: cap-node
+bupa.node.url: https://cdsnode-cdsjavaruntime-bupa-srv-otel.cfapps.sap.hana.ondemand.com
 cds:
   remote.services:
     '[API_BUSINESS_PARTNER]':
       destination:
         type: "odata-v2"
-        properties:
-          url: "https://localhost:8080/"
-        headers:
-          Authorization: "YWRtaW46YWRtaW4=" # admin:admin
+        service: "sap/opu/odata/sap"
+        name: local-bp-node
 
 ---
 spring:
