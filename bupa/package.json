@@ -24,30 +24,19 @@
   },
   "cds": {
     "requires": {
-      "[development]": {
-        "auth": {
-          "users": {
-            "alice": {
-              "roles": [
-                "system-user"
-              ]
-            }
+      "auth": {
+        "kind": "mocked",
+        "users": {
+          "admin": {
+            "roles": [
+              "admin",
+              "system-user"
+            ]
           }
         }
       },
       "[production]": {
         "db": "hana",
-        "auth": {
-          "__TODO__": "adjust to needed",
-          "kind": "mocked",
-          "users": {
-            "alice": {
-              "roles": [
-                "system-user"
-              ]
-            }
-          }
-        },
         "telemetry": {
           "kind": "to-cloud-logging"
         }
