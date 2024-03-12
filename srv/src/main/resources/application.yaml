@@ -61,7 +61,7 @@ cds:
   remote.services:
     '[API_BUSINESS_PARTNER]':
       destination:
-        type: "odata-v2"
+        type: "odata-v4"
         service: "sap/opu/odata/sap"
         name: local-bp-node
 

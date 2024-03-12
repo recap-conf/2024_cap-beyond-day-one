@@ -5,13 +5,13 @@ using {db} from '../db';
 service API_BUSINESS_PARTNER {
   entity A_BusinessPartnerAddress as
     projection on db.A_BusinessPartnerAddress {
-      key AddressID             as ID,
-      key BusinessPartner       as businessPartner,
-          @readonly Country     as country,
-          @readonly CityName    as city,
-          @readonly PostalCode  as postalCode,
-          @readonly StreetName  as street,
-          @readonly HouseNumber as houseNumber,
+      key AddressID,
+      key BusinessPartner,
+          @readonly Country,
+          @readonly CityName,
+          @readonly PostalCode,
+          @readonly StreetName,
+          @readonly HouseNumber,
           false                 as tombstone : Boolean
     };
 }
