@@ -8,12 +8,17 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import cds.gen.my.bookshop.Bookshop_;
+import com.sap.cds.Row;
 import com.sap.cds.services.auditlog.AuditLogService;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.LongCounter;
+import io.opentelemetry.api.metrics.LongHistogram;
 import io.opentelemetry.api.metrics.Meter;
+import io.opentelemetry.api.metrics.ObservableLongGauge;
+import io.opentelemetry.api.metrics.ObservableLongMeasurement;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Scope;
@@ -56,176 +61,191 @@ import my.bookshop.RatingCalculator;
 
 /**
  * Custom business logic for the "Catalog Service" (see cat-service.cds)
- *
+ * <p>
  * Handles Reading of Books
- *
+ * <p>
  * Adds Discount Message to the Book Title if too much stock is available
- *
+ * <p>
  * Provides adding book reviews
  */
 @Component
 @ServiceName(CatalogService_.CDS_NAME)
 class CatalogServiceHandler implements EventHandler {
 
-	private final PersistenceService db;
-	private final DraftService reviewService;
+    private final PersistenceService db;
+    private final DraftService reviewService;
 
-	private final Messages messages;
-	private final FeatureTogglesInfo featureToggles;
-	private final RatingCalculator ratingCalculator;
-	private final CqnAnalyzer analyzer;
-	private final Tracer tracer = GlobalOpenTelemetry.getTracerProvider().tracerBuilder("RatingCalculator").build();
-	private final Meter meter = GlobalOpenTelemetry.getMeterProvider().meterBuilder("RatingCalculator").build();
+    private final Messages messages;
+    private final FeatureTogglesInfo featureToggles;
+    private final RatingCalculator ratingCalculator;
+    private final CqnAnalyzer analyzer;
+    private final Tracer tracer = GlobalOpenTelemetry.getTracerProvider().tracerBuilder("RatingCalculator").build();
+    private final Meter meter = GlobalOpenTelemetry.getMeterProvider().meterBuilder("RatingCalculator").build();
 
-	@Autowired
-	AuditLogService auditLog;
+    @Autowired
+    AuditLogService auditLog;
 
-	CatalogServiceHandler(PersistenceService db, @Qualifier(ReviewService_.CDS_NAME) DraftService reviewService,
-			Messages messages, FeatureTogglesInfo featureToggles, RatingCalculator ratingCalculator, CdsModel model) {
-		this.db = db;
-		this.reviewService = reviewService;
-		this.messages = messages;
-		this.featureToggles = featureToggles;
-		this.ratingCalculator = ratingCalculator;
-		this.analyzer = CqnAnalyzer.create(model);
-	}
+    CatalogServiceHandler(PersistenceService db, @Qualifier(ReviewService_.CDS_NAME) DraftService reviewService,
+                          Messages messages, FeatureTogglesInfo featureToggles, RatingCalculator ratingCalculator, CdsModel model) {
+        this.db = db;
+        this.reviewService = reviewService;
+        this.messages = messages;
+        this.featureToggles = featureToggles;
+        this.ratingCalculator = ratingCalculator;
+        this.analyzer = CqnAnalyzer.create(model);
+    }
 
-	/**
-	 * Invokes some validations before creating a review.
-	 *
-	 * @param context {@link ReviewContext}
-	 */
-	@Before(entity = Books_.CDS_NAME)
-	public void beforeAddReview(AddReviewContext context) {
-		String user = context.getUserInfo().getName();
-		String bookId = (String) analyzer.analyze(context.getCqn()).targetKeys().get(Books.ID);
+    /**
+     * Invokes some validations before creating a review.
+     *
+     * @param context {@link ReviewContext}
+     */
+    @Before(entity = Books_.CDS_NAME)
+    public void beforeAddReview(AddReviewContext context) {
+        String user = context.getUserInfo().getName();
+        String bookId = (String) analyzer.analyze(context.getCqn()).targetKeys().get(Books.ID);
 
-		Result result = db.run(Select.from(CatalogService_.REVIEWS)
-				.where(review -> review.book_ID().eq(bookId).and(review.createdBy().eq(user))));
+        Result result = db.run(Select.from(CatalogService_.REVIEWS)
+                .where(review -> review.book_ID().eq(bookId).and(review.createdBy().eq(user))));
 
-		if (result.first().isPresent()) {
-			throw new ServiceException(ErrorStatuses.METHOD_NOT_ALLOWED, MessageKeys.REVIEW_ADD_FORBIDDEN)
-					.messageTarget(Reviews_.class, r -> r.createdBy());
-		}
-	}
+        if (result.first().isPresent()) {
+            throw new ServiceException(ErrorStatuses.METHOD_NOT_ALLOWED, MessageKeys.REVIEW_ADD_FORBIDDEN)
+                    .messageTarget(Reviews_.class, r -> r.createdBy());
+        }
+    }
 
-	/**
-	 * Handles the review creation from the given context.
-	 *
-	 * @param context {@link ReviewContext}
-	 */
-	@On(entity = Books_.CDS_NAME)
-	public void onAddReview(AddReviewContext context) {
-		Integer rating = context.getRating();
-		String title = context.getTitle();
-		String text = context.getText();
+    /**
+     * Handles the review creation from the given context.
+     *
+     * @param context {@link ReviewContext}
+     */
+    @On(entity = Books_.CDS_NAME)
+    public void onAddReview(AddReviewContext context) {
+        Integer rating = context.getRating();
+        String title = context.getTitle();
+        String text = context.getText();
 
-		String bookId = (String) analyzer.analyze(context.getCqn()).targetKeys().get(Books.ID);
+        String bookId = (String) analyzer.analyze(context.getCqn()).targetKeys().get(Books.ID);
 
-		cds.gen.reviewservice.Reviews review = cds.gen.reviewservice.Reviews.create();
-		review.setBookId(bookId);
-		review.setRating(rating);
-		review.setTitle(title);
-		review.setText(text);
+        cds.gen.reviewservice.Reviews review = cds.gen.reviewservice.Reviews.create();
+        review.setBookId(bookId);
+        review.setRating(rating);
+        review.setTitle(title);
+        review.setText(text);
 
-		Result res = reviewService.run(Insert.into(ReviewService_.REVIEWS).entry(review));
-		cds.gen.reviewservice.Reviews inserted = res.single(cds.gen.reviewservice.Reviews.class);
+        Result res = reviewService.run(Insert.into(ReviewService_.REVIEWS).entry(review));
+        cds.gen.reviewservice.Reviews inserted = res.single(cds.gen.reviewservice.Reviews.class);
 
-		messages.success(MessageKeys.REVIEW_ADDED);
+        messages.success(MessageKeys.REVIEW_ADDED);
 
-		context.setResult(Struct.access(inserted).as(Reviews.class));
-	}
+        context.setResult(Struct.access(inserted).as(Reviews.class));
+    }
 
-	/**
-	 * Recalculates and sets the book rating after a new review for the given book.
-	 *
-	 * @param context {@link ReviewContext}
-	 */
-	@After(entity = Books_.CDS_NAME)
-	public void afterAddReview(AddReviewContext context) {
-		Span childSpan = tracer.spanBuilder("setBookRating").startSpan();
-		childSpan.setAttribute("book.title", context.getResult().getTitle());
-		childSpan.setAttribute("book.id", context.getResult().getBookId());
-		childSpan.setAttribute("book.rating", context.getResult().getRating());
+    /**
+     * Recalculates and sets the book rating after a new review for the given book.
+     *
+     * @param context {@link ReviewContext}
+     */
+    @After(entity = Books_.CDS_NAME)
+    public void afterAddReview(AddReviewContext context) {
+        Span childSpan = tracer.spanBuilder("setBookRating").startSpan();
+        childSpan.setAttribute("book.title", context.getResult().getTitle());
+        childSpan.setAttribute("book.id", context.getResult().getBookId());
+        childSpan.setAttribute("book.rating", context.getResult().getRating());
 
-		try(Scope scope = childSpan.makeCurrent()) {
-			ratingCalculator.setBookRating(context.getResult().getBookId());
-		} catch (Throwable t) {
-			childSpan.recordException(t);
-			throw t;
-		} finally {
-			childSpan.end();
-		}
+        try (Scope scope = childSpan.makeCurrent()) {
+            ratingCalculator.setBookRating(context.getResult().getBookId());
+        } catch (Throwable t) {
+            childSpan.recordException(t);
+            throw t;
+        } finally {
+            childSpan.end();
+        }
 
-		LongCounter counter = meter.counterBuilder("reviewCounter").setDescription("Counts the number of reviews created per book").build();
-		counter.add(1, Attributes.of(AttributeKey.stringKey("bookId"), context.getResult().getBookId()));
-	}
 
-	@After(event = CqnService.EVENT_READ)
-	public void discountBooks(Stream<Books> books) {
-		books.filter(b -> b.getTitle() != null).forEach(b -> {
-			loadStockIfNotSet(b);
-			discountBooksWithMoreThan111Stock(b, featureToggles.isEnabled("discount"));
-		});
-	}
+        LongCounter counter = meter.counterBuilder("reviewCounter").setDescription("Counts the number of reviews created per book").build();
+        counter.add(1, Attributes.of(AttributeKey.stringKey("bookId"), context.getResult().getBookId(),
+                AttributeKey.stringKey("isbn"), getIsbn(context),
+                AttributeKey.longKey("rating"), (long)context.getResult().getRating()));
+    }
 
-	@After
-	public void setIsReviewable(CdsReadEventContext context, List<Books> books) {
-		String user = context.getUserInfo().getName();
-		List<String> bookIds = books.stream().filter(b -> b.getId() != null).map(b -> b.getId())
-				.collect(Collectors.toList());
+    @After(event = CqnService.EVENT_READ)
+    public void discountBooks(Stream<Books> books) {
+        books.filter(b -> b.getTitle() != null).forEach(b -> {
+            loadStockIfNotSet(b);
+            discountBooksWithMoreThan111Stock(b, featureToggles.isEnabled("discount"));
+        });
+    }
 
-		if (bookIds.isEmpty()) {
-			return;
-		}
+    @After
+    public void setIsReviewable(CdsReadEventContext context, List<Books> books) {
+        String user = context.getUserInfo().getName();
+        List<String> bookIds = books.stream().filter(b -> b.getId() != null).map(b -> b.getId())
+                .collect(Collectors.toList());
 
-		CqnSelect query = Select.from(CatalogService_.BOOKS, b -> b.filter(b.ID().in(bookIds)).reviews())
-				.where(r -> r.createdBy().eq(user));
+        if (bookIds.isEmpty()) {
+            return;
+        }
 
-		Set<String> reviewedBooks = db.run(query).streamOf(Reviews.class).map(Reviews::getBookId)
-				.collect(Collectors.toSet());
+        CqnSelect query = Select.from(CatalogService_.BOOKS, b -> b.filter(b.ID().in(bookIds)).reviews())
+                .where(r -> r.createdBy().eq(user));
 
-		for (Books book : books) {
-			if (reviewedBooks.contains(book.getId())) {
-				book.setIsReviewable(false);
-			}
-		}
-	}
+        Set<String> reviewedBooks = db.run(query).streamOf(Reviews.class).map(Reviews::getBookId)
+                .collect(Collectors.toSet());
 
-	@On
-	public void onSubmitOrder(SubmitOrderContext context) {
-		Integer quantity = context.getQuantity();
-		String bookId = context.getBook();
+        for (Books book : books) {
+            if (reviewedBooks.contains(book.getId())) {
+                book.setIsReviewable(false);
+            }
+        }
+    }
 
-		Optional<Books> book = db.run(Select.from(BOOKS).columns(Books_::stock).byId(bookId)).first(Books.class);
+    @On
+    public void onSubmitOrder(SubmitOrderContext context) {
+        Integer quantity = context.getQuantity();
+        String bookId = context.getBook();
 
-		book.orElseThrow(() -> new ServiceException(ErrorStatuses.NOT_FOUND, MessageKeys.BOOK_MISSING)
-				.messageTarget(Books_.class, b -> b.ID()));
+        Optional<Books> book = db.run(Select.from(BOOKS).columns(Books_::stock).byId(bookId)).first(Books.class);
 
-		int stock = book.map(Books::getStock).get();
+        book.orElseThrow(() -> new ServiceException(ErrorStatuses.NOT_FOUND, MessageKeys.BOOK_MISSING)
+                .messageTarget(Books_.class, b -> b.ID()));
 
-		if (stock >= quantity) {
-			db.run(Update.entity(BOOKS).byId(bookId).data(Books.STOCK, stock -= quantity));
+        int stock = book.map(Books::getStock).get();
 
-			SubmitOrderContext.ReturnType result = SubmitOrderContext.ReturnType.create();
-			result.setStock(stock);
+        if (stock >= quantity) {
+            db.run(Update.entity(BOOKS).byId(bookId).data(Books.STOCK, stock -= quantity));
 
-			context.setResult(result);
-		} else {
-			throw new ServiceException(ErrorStatuses.CONFLICT, MessageKeys.ORDER_EXCEEDS_STOCK, quantity);
-		}
-	}
+            SubmitOrderContext.ReturnType result = SubmitOrderContext.ReturnType.create();
+            result.setStock(stock);
 
-	private void discountBooksWithMoreThan111Stock(Books b, boolean premium) {
-		if (b.getStock() != null && b.getStock() > 111) {
-			b.setTitle(String.format("%s -- %s%% discount", b.getTitle(), premium ? 14 : 11));
-		}
-	}
+            context.setResult(result);
+        } else {
+            throw new ServiceException(ErrorStatuses.CONFLICT, MessageKeys.ORDER_EXCEEDS_STOCK, quantity);
+        }
+    }
 
-	private void loadStockIfNotSet(Books b) {
-		if (b.getId() != null && b.getStock() == null) {
-			b.setStock(db.run(Select.from(BOOKS).byId(b.getId()).columns(Books_::stock)).single(Books.class).getStock());
-		}
-	}
+    private String getIsbn(AddReviewContext context) {
+        Result result = db.run(Select.from(Books_.class).byId(context.getResult().getBookId()));
+        final String isbn;
+
+        Optional<Row> row = result.first();
+        if(row.isPresent()) {
+            return (String)row.get().get(Books.ISBN);
+        } else {
+            return "unknown";
+        }
+    }
+
+    private void discountBooksWithMoreThan111Stock(Books b, boolean premium) {
+        if (b.getStock() != null && b.getStock() > 111) {
+            b.setTitle(String.format("%s -- %s%% discount", b.getTitle(), premium ? 14 : 11));
+        }
+    }
+
+    private void loadStockIfNotSet(Books b) {
+        if (b.getId() != null && b.getStock() == null) {
+            b.setStock(db.run(Select.from(BOOKS).byId(b.getId()).columns(Books_::stock)).single(Books.class).getStock());
+        }
+    }
 
 }

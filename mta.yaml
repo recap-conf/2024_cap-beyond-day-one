@@ -26,6 +26,7 @@ modules:
         JBP_CONFIG_JAVA_OPTS: "[from_environment: false, java_opts: '-Dotel.javaagent.extension.sap.cf.binding.dynatrace.metrics.token-name=metrics_token -javaagent:META-INF/.sap_java_buildpack/otel_agent/opentelemetry-javaagent.jar -Dotel.javaagent.extensions=BOOT-INF/lib/cf-java-logging-support-opentelemetry-agent-extension-3.8.2.jar']"
         OTEL_METRICS_EXPORTER: cloud-logging,dynatrace
         OTEL_TRACES_EXPORTER: cloud-logging
+        BUPA_NODE_URL: ~{bupa-srv-api/srv-url}
     build-parameters:
       builder: custom
       commands:
@@ -34,8 +35,9 @@ modules:
     requires:
       - name: bookshop-hdi-container-otel
       - name: bookshop-uaa-otel
-      - name: cdsnode-dynatrace
-      - name: cdsnode-cloud-logging
+      - name: dynatrace
+      - name: bookshop-cloud-logging
+      - name: bupa-srv-api
     provides:
       - name: srv-api
         properties:
@@ -70,6 +72,8 @@ modules:
           srv-url: ${default-url}
     requires:
       - name: bupa-hdi-container-otel
+      - name: dynatrace
+      - name: bookshop-cloud-logging
 # --------------------- BUPA DB MODULE ----------------------
   - name: bupa-db-otel
 # -----------------------------------------------------------
@@ -126,7 +130,7 @@ resources:
     parameters:
       service: hana
       service-plan: hdi-shared
-  - name: cdsnode-dynatrace
+  - name: dynatrace
     type: org.cloudfoundry.existing-service
-  - name: cdsnode-cloud-logging
+  - name: bookshop-cloud-logging
     type: org.cloudfoundry.existing-service
