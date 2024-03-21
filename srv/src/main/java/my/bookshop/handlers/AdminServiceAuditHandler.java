@@ -56,7 +56,7 @@ class AdminServiceAuditHandler implements EventHandler {
 		this.auditLog = auditLog;
 	}
 
-	@Before(event = { CqnService.EVENT_READ }, entity = { Orders_.CDS_NAME })
+	//@Before(event = { CqnService.EVENT_READ }, entity = { Orders_.CDS_NAME })
 	public void beforeRead(CdsReadEventContext context) {
 		System.out.println("Custom handler");
 

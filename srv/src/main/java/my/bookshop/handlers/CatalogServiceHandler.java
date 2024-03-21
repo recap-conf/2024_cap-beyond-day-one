@@ -161,15 +161,19 @@ class CatalogServiceHandler implements EventHandler {
         } finally {
             childSpan.end();
         }
+     }
 
+     @After(entity = Books_.CDS_NAME)
+     public void reportMetric(AddReviewContext context) {
+         LongCounter counter = meter.counterBuilder("reviewCounter").setDescription("Counts the number of reviews created per book").build();
 
-        LongCounter counter = meter.counterBuilder("reviewCounter").setDescription("Counts the number of reviews created per book").build();
-        counter.add(1, Attributes.of(AttributeKey.stringKey("bookId"), context.getResult().getBookId(),
-                AttributeKey.stringKey("isbn"), getIsbn(context),
-                AttributeKey.longKey("rating"), (long)context.getResult().getRating()));
-    }
+         counter.add(1, Attributes.of(
+                 AttributeKey.stringKey("bookId"), context.getResult().getBookId(),
+                 AttributeKey.stringKey("isbn"), getIsbn(context),
+                 AttributeKey.longKey("rating"), (long)context.getResult().getRating()));
+     }
 
-    @After(event = CqnService.EVENT_READ)
+    //@After(event = CqnService.EVENT_READ)
     public void discountBooks(Stream<Books> books) {
         books.filter(b -> b.getTitle() != null).forEach(b -> {
             loadStockIfNotSet(b);
