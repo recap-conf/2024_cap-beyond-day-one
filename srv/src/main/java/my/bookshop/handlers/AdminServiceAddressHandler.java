@@ -68,8 +68,9 @@ public class AdminServiceAddressHandler implements EventHandler {
 		}
 
 		// add BusinessPartner where condition
-		String businessPartner = context.getUserInfo().getAttributeValues("businessPartner").stream().findFirst()
-			.orElseThrow(() -> new ServiceException(ErrorStatuses.FORBIDDEN, MessageKeys.BUPA_MISSING));
+		String businessPartner = "10401010";
+		//context.getUserInfo().getAttributeValues("businessPartner").stream().findFirst()
+		//	.orElseThrow(() -> new ServiceException(ErrorStatuses.FORBIDDEN, MessageKeys.BUPA_MISSING));
 
 		CqnSelect select = CQL.copy(context.getCqn(), new Modifier() {
 

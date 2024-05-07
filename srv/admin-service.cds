@@ -2,7 +2,7 @@ using {sap.common.Languages as CommonLanguages} from '@sap/cds/common';
 using {my.bookshop as my} from '../db/index';
 
 @path : 'admin'
-service AdminService @(requires : 'admin') {
+service AdminService @(requires : 'authenticated-user') {
   entity Books   as projection on my.Books excluding { reviews } actions {
     action addToOrder(order_ID : UUID, quantity : Integer) returns Orders;
   }
