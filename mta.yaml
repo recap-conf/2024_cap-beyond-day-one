@@ -10,38 +10,6 @@ build-parameters:
       commands:
         - npm run build-bupa
 modules:
-# --------------------- SERVER MODULE ------------------------
-  - name: bookshop-srv-otel
-# ------------------------------------------------------------
-    type: java
-    path: srv
-    parameters:
-      memory: 1024M
-      disk-quota: 512M
-      buildpack: sap_java_buildpack
-    properties:
-        SPRING_PROFILES_ACTIVE: cloud,cap-node
-        JBP_CONFIG_COMPONENTS: "jres: ['com.sap.xs.java.buildpack.jre.SAPMachineJRE']"
-        JBP_CONFIG_SAP_MACHINE_JRE: '{ version: 17.+ }'
-        JBP_CONFIG_JAVA_OPTS: "[from_environment: false, java_opts: '-Dotel.javaagent.extension.sap.cf.binding.dynatrace.metrics.token-name=metrics_token -javaagent:META-INF/.sap_java_buildpack/otel_agent/opentelemetry-javaagent.jar -Dotel.javaagent.extensions=BOOT-INF/lib/cf-java-logging-support-opentelemetry-agent-extension-3.8.2.jar']"
-        OTEL_METRICS_EXPORTER: cloud-logging,dynatrace
-        OTEL_TRACES_EXPORTER: cloud-logging
-        BUPA_NODE_URL: ~{bupa-srv-api/srv-url}
-    build-parameters:
-      builder: custom
-      commands:
-        - mvn clean package -DskipTests=true
-      build-result: target/*-exec.jar
-    requires:
-      - name: bookshop-hdi-container-otel
-      - name: bookshop-uaa-otel
-      - name: dynatrace
-      - name: bookshop-cloud-logging
-      - name: bupa-srv-api
-    provides:
-      - name: srv-api
-        properties:
-          srv-url: '${default-url}'
 # --------------------- DB MODULE ---------------------------
   - name: bookshop-db-otel
 # -----------------------------------------------------------
@@ -57,26 +25,9 @@ modules:
         - name: bookshop-srv-otel
     requires:
       - name: bookshop-hdi-container-otel
-# --------------------- BUPA SERVER MODULE -------------------
-  - name: bupa-srv-otel
-# ------------------------------------------------------------
-    type: nodejs
-    path: bupa/gen/srv
-    parameters:
-      buildpack: nodejs_buildpack
-    build-parameters:
-      builder: npm
-    provides:
-      - name: bupa-srv-api
-        properties:
-          srv-url: ${default-url}
-    requires:
-      - name: bupa-hdi-container-otel
-      - name: dynatrace
-      - name: bookshop-cloud-logging
-# --------------------- BUPA DB MODULE ----------------------
+  # --------------------- BUPA DB MODULE ----------------------
   - name: bupa-db-otel
-# -----------------------------------------------------------
+    # -----------------------------------------------------------
     type: hdb
     path: bupa/gen/db
     parameters:
@@ -104,6 +55,55 @@ modules:
       - name: app-api
         properties:
           app-url: '${default-url}'
+  # --------------------- BUPA SERVER MODULE -------------------
+  - name: bupa-srv-otel
+  # ------------------------------------------------------------
+    type: nodejs
+    path: bupa/gen/srv
+    parameters:
+      buildpack: nodejs_buildpack
+    build-parameters:
+      builder: npm
+    provides:
+      - name: bupa-srv-api
+        properties:
+          srv-url: ${default-url}
+    requires:
+      - name: bupa-hdi-container-otel
+      - name: bookshop-cloud-logging
+  # --------------------- SERVER MODULE ------------------------
+  - name: bookshop-srv-otel
+  # ------------------------------------------------------------
+    type: java
+    path: srv
+    parameters:
+      memory: 1024M
+      disk-quota: 512M
+      buildpack: sap_java_buildpack
+    properties:
+      SPRING_PROFILES_ACTIVE: cloud,cap-node
+      JBP_CONFIG_COMPONENTS: "jres: ['com.sap.xs.java.buildpack.jre.SAPMachineJRE']"
+      JBP_CONFIG_SAP_MACHINE_JRE: '{ version: 17.+ }'
+      JBP_CONFIG_JAVA_OPTS: "[from_environment: false, java_opts: 
+                  '-javaagent:META-INF/.sap_java_buildpack/otel_agent/opentelemetry-javaagent.jar 
+                  -Dotel.javaagent.extensions=META-INF/.sap_java_buildpack/otel_agent_extension/otel-agent-ext-java.jar']"
+      OTEL_METRICS_EXPORTER: cloud-logging
+      OTEL_TRACES_EXPORTER: cloud-logging
+      BUPA_NODE_URL: ~{bupa-srv-api/srv-url}
+    build-parameters:
+      builder: custom
+      commands:
+        - mvn clean package -DskipTests=true
+      build-result: target/*-exec.jar
+    requires:
+      - name: bookshop-hdi-container-otel
+      - name: bookshop-uaa-otel
+      - name: bupa-srv-api
+      - name: bookshop-cloud-logging
+    provides:
+      - name: srv-api
+        properties:
+          srv-url: '${default-url}'
 # --------------------- RESOURCES ---------------------
 resources:
 # -----------------------------------------------------
@@ -114,7 +114,7 @@ resources:
       service-plan: application
       path: ./xs-security.json
       config: # override xsappname as it needs to be unique
-        xsappname: bookshop-otel
+        xsappname: bookshop-otel-${org}-${space}
         oauth2-configuration:
           redirect-uris:
           - ~{app-api/app-url}/**
@@ -130,7 +130,5 @@ resources:
     parameters:
       service: hana
       service-plan: hdi-shared
-  - name: dynatrace
-    type: org.cloudfoundry.existing-service
   - name: bookshop-cloud-logging
     type: org.cloudfoundry.existing-service
