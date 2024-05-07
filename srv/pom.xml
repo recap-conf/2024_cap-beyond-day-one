@@ -76,12 +76,6 @@
 			<artifactId>opentelemetry-api</artifactId>
 			<version>1.25.0</version>
 		</dependency>
-		<dependency>
-			<groupId>com.sap.hcp.cf.logging</groupId>
-			<artifactId>cf-java-logging-support-opentelemetry-agent-extension</artifactId>
-			<version>${cf-java-logging-support.version}</version>
-		</dependency>
-
 
 		<!-- CLOUD SDK dependencies -->
 		<dependency>
