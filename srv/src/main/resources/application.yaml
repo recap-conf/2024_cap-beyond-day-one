@@ -18,10 +18,10 @@ cds:
       admin:
         password: admin
         roles:
-        - admin
+          - admin
         attributes:
           businessPartner:
-          - "10401010"
+            - "10401010"
       user:
         password: user
 server.servlet.encoding:
@@ -59,7 +59,7 @@ spring:
 bupa.node.url: https://cdsnode-cdsjavaruntime-bupa-srv-otel.cfapps.sap.hana.ondemand.com
 cds:
   remote.services:
-    '[API_BUSINESS_PARTNER]':
+    "[API_BUSINESS_PARTNER]":
       destination:
         type: "odata-v4"
         service: "sap/opu/odata/sap"
@@ -70,7 +70,7 @@ spring:
   config.activate.on-profile: sandbox
 cds:
   remote.services:
-    '[API_BUSINESS_PARTNER]':
+    "[API_BUSINESS_PARTNER]":
       destination:
         type: "odata-v2"
         properties:
@@ -83,11 +83,29 @@ spring:
   config.activate.on-profile: destination
 cds:
   remote.services:
-    '[API_BUSINESS_PARTNER]':
+    "[API_BUSINESS_PARTNER]":
       destination:
         type: "odata-v2"
         name: "s4-destination"
         suffix: "/sap/opu/odata/sap"
+
+---
+spring:
+  config.activate.on-profile: destination_local
+cds:
+  messaging.services:
+    messsging:
+      enabled: true
+      kind: "file-based-messaging"
+      binding: "/Users/d040506/git/samples/recap/recap_demo/srv/src/main/resources/messaging.txt"
+  remote.services:
+    "[API_BUSINESS_PARTNER]":
+      destination:
+        type: "odata-v4"
+        properties:
+          url: "http://localhost:4004/sap/opu/odata/sap"
+        headers:
+          Authorization: Basic YWRtaW46YWRtaW4=
 
 ---
 spring:
@@ -102,7 +120,7 @@ cds:
       serve:
         path: API_BUSINESS_PARTNER
   remote.services:
-    '[API_BUSINESS_PARTNER]':
+    "[API_BUSINESS_PARTNER]":
       destination:
         name: "myself"
         suffix: "/api"
@@ -115,11 +133,11 @@ cds:
   security.mock.users:
     admin:
       features:
-      - isbn
-      - discount
+        - isbn
+        - discount
     user:
       features:
-      - isbn
+        - isbn
 
 ---
 spring:

@@ -1,13 +1,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>3.1.4</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<relativePath/>
+		<!-- lookup parent from repository -->
 	</parent>
 
 	<groupId>my</groupId>
@@ -23,7 +23,7 @@
 
 		<!-- DEPENDENCIES VERSION -->
 		<jdk.version>17</jdk.version>
-		<cds.services.version>2.9.0</cds.services.version>
+		<cds.services.version>2.9.1</cds.services.version>
 		<cloud.sdk.version>4.30.0</cloud.sdk.version>
 		<xsuaa.version>3.4.2</xsuaa.version>
 		<cf-java-logging-support.version>3.8.2</cf-java-logging-support.version>
