@@ -49,9 +49,8 @@ spring:
 cds:
   messaging.services:
     bupa-messaging:
-      kind: enterprise-messaging
+      kind: file-based-messaging
       format: cloudevents
-      subscribe-prefix: sap/S4HANAOD/java/ce/
 
 ---
 spring:
