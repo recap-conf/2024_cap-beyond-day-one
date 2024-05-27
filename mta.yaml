@@ -70,7 +70,7 @@ modules:
           srv-url: ${default-url}
     requires:
       - name: bs-bupa-hdi-container-otel
-      - name: bookshop-cloud-logging
+      - name: bs-cloud-logging
   # --------------------- SERVER MODULE ------------------------
   - name: bs-srv-otel
     # ------------------------------------------------------------
@@ -99,7 +99,7 @@ modules:
       - name: bs-hdi-container-otel
       - name: bs-uaa-otel
       - name: bs-bupa-srv-api
-      - name: bookshop-cloud-logging
+      - name: bs-cloud-logging
     provides:
       - name: srv-api
         properties:
@@ -130,5 +130,10 @@ resources:
     parameters:
       service: hana
       service-plan: hdi-shared
-  - name: bookshop-cloud-logging
-    type: org.cloudfoundry.existing-service
+  - name: bs-cloud-logging
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: cloud-logging
+      service-plan: standard
+      config:
+        ingest_otlp: true
