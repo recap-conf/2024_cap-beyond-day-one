@@ -135,5 +135,4 @@ resources:
     parameters:
       service: cloud-logging
       service-plan: standard
-      config:
-        ingest_otlp: true
+      path: ./cf-logging.json

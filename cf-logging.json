@@ -1,0 +1,19 @@
+{
+    "backend": {
+        "max_data_nodes": 2
+    },
+    "dashboards": {
+        "custom_label": ""
+    },
+    "ingest": {
+        "max_instances": 2
+    },
+    "ingest_otlp": {
+        "enabled": true
+    },
+    "retention_period": 7,
+    "rotate_root_ca": false,
+    "saml": {
+        "enabled": false
+    }
+}
