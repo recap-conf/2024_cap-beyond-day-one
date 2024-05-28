@@ -1,7 +1,7 @@
 ---
 logging:
   level:
-    com.sap.cds.otel.span.RequestContext: INFO
+    "[com.sap.cds.otel.span.RequestContext]": INFO
 spring:
   web.resources.static-locations: "file:./app"
   jmx:
@@ -9,11 +9,7 @@ spring:
 cds:
   odata-v4.endpoint.path: "/api"
   odata-v4.serializer.enabled: true
-  multi-tenancy:
-    compatibility.enabled: false
-    mtxs.enabled: true
   security:
-    authentication.normalize-provider-tenant: true
     mock.users:
       admin:
         password: admin
@@ -66,31 +62,7 @@ cds:
 
 ---
 spring:
-  config.activate.on-profile: sandbox
-cds:
-  remote.services:
-    "[API_BUSINESS_PARTNER]":
-      destination:
-        type: "odata-v2"
-        properties:
-          url: "https://sandbox.api.sap.com/s4hanacloud/sap/opu/odata/sap"
-        headers:
-          APIKey: "" # Place API Key from SAP API Business Hub here or use environment variable CDS_REMOTE_SERVICES_API_BUSINESS_PARTNER_DESTINATION_HEADERS_APIKEY
-
----
-spring:
-  config.activate.on-profile: destination
-cds:
-  remote.services:
-    "[API_BUSINESS_PARTNER]":
-      destination:
-        type: "odata-v2"
-        name: "s4-destination"
-        suffix: "/sap/opu/odata/sap"
-
----
-spring:
-  config.activate.on-profile: destination_local
+  config.activate.on-profile: local
 cds:
   messaging.services:
     messsging:
@@ -105,49 +77,6 @@ cds:
           url: "http://localhost:4004/sap/opu/odata/sap"
         headers:
           Authorization: Basic YWRtaW46YWRtaW4=
-
----
-spring:
-  config.activate.on-profile: mocked
-cds:
-  messaging.services:
-    bupa-messaging:
-      kind: file-based-messaging
-  application.services:
-    api-business-partner-mocked:
-      model: API_BUSINESS_PARTNER
-      serve:
-        path: API_BUSINESS_PARTNER
-  remote.services:
-    "[API_BUSINESS_PARTNER]":
-      destination:
-        name: "myself"
-        suffix: "/api"
-
----
-spring:
-  config.activate.on-profile: ft
-cds:
-  model.provider.url: http://localhost:4005
-  security.mock.users:
-    admin:
-      features:
-        - isbn
-        - discount
-    user:
-      features:
-        - isbn
-
----
-spring:
-  config.activate.on-profile: local-mtxs
-cds:
-  multi-tenancy.sidecar.url: http://localhost:4005
-  security.mock.users:
-    admin:
-      tenant: t1
-    user:
-      tenant: t1
 
 ---
 spring:

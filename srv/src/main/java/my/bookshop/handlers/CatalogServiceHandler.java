@@ -8,17 +8,13 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import cds.gen.my.bookshop.Bookshop_;
-import com.sap.cds.Row;
+
 import com.sap.cds.services.auditlog.AuditLogService;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.LongCounter;
-import io.opentelemetry.api.metrics.LongHistogram;
 import io.opentelemetry.api.metrics.Meter;
-import io.opentelemetry.api.metrics.ObservableLongGauge;
-import io.opentelemetry.api.metrics.ObservableLongMeasurement;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Scope;
@@ -37,7 +33,6 @@ import com.sap.cds.reflect.CdsModel;
 import com.sap.cds.services.ErrorStatuses;
 import com.sap.cds.services.ServiceException;
 import com.sap.cds.services.cds.CdsReadEventContext;
-import com.sap.cds.services.cds.CqnService;
 import com.sap.cds.services.draft.DraftService;
 import com.sap.cds.services.handler.EventHandler;
 import com.sap.cds.services.handler.annotations.After;
@@ -169,7 +164,6 @@ class CatalogServiceHandler implements EventHandler {
 
          counter.add(1, Attributes.of(
                  AttributeKey.stringKey("bookId"), context.getResult().getBookId(),
-                 AttributeKey.stringKey("isbn"), getIsbn(context),
                  AttributeKey.longKey("rating"), (long)context.getResult().getRating()));
      }
 
@@ -225,18 +219,6 @@ class CatalogServiceHandler implements EventHandler {
             context.setResult(result);
         } else {
             throw new ServiceException(ErrorStatuses.CONFLICT, MessageKeys.ORDER_EXCEEDS_STOCK, quantity);
-        }
-    }
-
-    private String getIsbn(AddReviewContext context) {
-        Result result = db.run(Select.from(Books_.class).byId(context.getResult().getBookId()));
-        final String isbn;
-
-        Optional<Row> row = result.first();
-        if(row.isPresent()) {
-            return (String)row.get().get(Books.ISBN);
-        } else {
-            return "unknown";
         }
     }
 

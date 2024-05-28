@@ -1,14 +1,13 @@
 {
     "requires": {
-        "multitenancy": true,
-        "extensibility": true,
-        "toggles": true
+        "multitenancy": false,
+        "extensibility": false,
+        "toggles": false
     },
     "build": {
         "target": "."
     },
     "profiles": [
-        "with-mtx-sidecar",
         "java"
     ]
 }
