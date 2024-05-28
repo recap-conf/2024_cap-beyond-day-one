@@ -3,7 +3,6 @@ package my.bookshop.handlers;
 import static cds.gen.adminservice.AdminService_.ADDRESSES;
 
 import java.time.Duration;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.slf4j.Logger;
@@ -121,31 +120,18 @@ public class AdminServiceAddressHandler implements EventHandler {
 			order.setShippingAddressBusinessPartner(businessPartner);
 		});
 	}
-
+	
 	@On(service = ApiBusinessPartner_.CDS_NAME)
 	public void updateBusinessPartnerAddresses(BusinessPartnerChangedContext context) {
 		logger.info(">> received: " + context.getData());
 		String businessPartner = context.getData().getBusinessPartner();
 
-		// fetch affected entries from local replicas
-		Result replicas = db.run(Select.from(ADDRESSES).where(a -> a.businessPartner().eq(businessPartner)));
+		// fetch changed data from S/4 -> might be less than local due to deletes
+		Result replicas = bupa.run(Select.from(ADDRESSES).where(a -> a.businessPartner().eq(businessPartner)));
 		if(replicas.rowCount() > 0) {
 			logger.info("Updating Addresses for BusinessPartner '{}'", businessPartner);
-			// fetch changed data from S/4 -> might be less than local due to deletes
-			Result remoteAddresses = bupa.run(Select.from(ADDRESSES).where(a -> a.businessPartner().eq(businessPartner)));
 			// update replicas or add tombstone if external address was deleted
-			replicas.streamOf(Addresses.class).forEach(rep -> {
-				Optional<Addresses> matching = remoteAddresses
-					.streamOf(Addresses.class)
-					.filter(ext -> ext.getId().equals(rep.getId()))
-					.findFirst();
-
-				if(!matching.isPresent()) {
-					rep.setTombstone(true);
-				} else {
-					matching.get().forEach(rep::put);
-				}
-			});
+			replicas.streamOf(Addresses.class).forEach(rep -> rep.setTombstone(true));
 			// update local replicas with changes from S/4
 			db.run(Upsert.into(ADDRESSES).entries(replicas));
 		}
