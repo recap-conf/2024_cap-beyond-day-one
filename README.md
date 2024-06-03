@@ -97,3 +97,11 @@ Finally confirm and you will find the logs of the custom handler in the dashboar
 You can now check whether the data has been persisted in the persistence section of the dashboard:
 
 ![alt text](assets/readmeImages/dashboard-6.png)
+
+In some cases, we want to see if the outbox is configured correctly and the events in the outbox are processed asynchronously. Since the audit log events are processed by the outbox, we can trigger them by fetching the books list in the `Browse books` action of the application:
+
+![alt text](assets/readmeImages/dashboard-7.png)
+
+In the Outbox section, you will find the outbox history the audit log event that was processed by the outbox . You can repeat it or create a custom outbox event to see how it behaves:
+
+![alt text](assets/readmeImages/dashboard-8.png)
