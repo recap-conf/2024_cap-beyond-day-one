@@ -1,5 +1,5 @@
 _schema-version: "2.1"
-ID: bs-recap-ws
+ID: bookshop-recap-ws
 version: 1.0.0
 description: "Bookshop CAP Java Project with UI"
 parameters:
@@ -11,7 +11,7 @@ build-parameters:
         - npm run build-bupa
 modules:
   # --------------------- DB MODULE ---------------------------
-  - name: bs-db-otel
+  - name: bookshop-db-otel
     # -----------------------------------------------------------
     type: hdb
     path: db
@@ -23,11 +23,11 @@ modules:
       commands:
         - npm run build
       requires:
-        - name: bs-srv-otel
+        - name: bookshop-srv-otel
     requires:
-      - name: bs-hdi-container-otel
+      - name: bookshop-hdi-container-otel
   # --------------------- BUPA DB MODULE ----------------------
-  - name: bs-bupa-db-otel
+  - name: bookshop-bupa-db-otel
     # -----------------------------------------------------------
     type: hdb
     path: bupa/gen/db
@@ -35,9 +35,9 @@ modules:
       buildpack: nodejs_buildpack
       memory: 128M
     requires:
-      - name: bs-bupa-hdi-container-otel
+      - name: bookshop-bupa-hdi-container-otel
   # --------------------- APPROUTER MODULE ---------------------
-  - name: bs-app-otel
+  - name: bookshop-app-otel
     # ------------------------------------------------------------
     type: approuter.nodejs
     path: app
@@ -52,13 +52,13 @@ modules:
           url: ~{srv-url}
           forwardAuthToken: true
           strictSSL: true
-      - name: bs-uaa-otel
+      - name: bookshop-uaa-otel
     provides:
       - name: app-api
         properties:
           app-url: "${default-url}"
   # --------------------- BUPA SERVER MODULE -------------------
-  - name: bs-bupa-srv-otel
+  - name: bookshop-bupa-srv-otel
     # ------------------------------------------------------------
     type: nodejs
     path: bupa/gen/srv
@@ -68,14 +68,15 @@ modules:
     build-parameters:
       builder: npm
     provides:
-      - name: bs-bupa-srv-api
+      - name: bookshop-bupa-srv-api
         properties:
           srv-url: ${default-url}
     requires:
-      - name: bs-bupa-hdi-container-otel
-      - name: bs-cloud-logging
+      - name: bookshop-bupa-hdi-container-otel
+      - name: bookshop-application-logs
+      - name: bookshop-cloud-logging
   # --------------------- SERVER MODULE ------------------------
-  - name: bs-srv-otel
+  - name: bookshop-srv-otel
     # ------------------------------------------------------------
     type: java
     path: srv
@@ -92,17 +93,18 @@ modules:
         -Dotel.javaagent.extensions=META-INF/.sap_java_buildpack/otel_agent_extension/otel-agent-ext-java.jar']"
       OTEL_METRICS_EXPORTER: cloud-logging
       OTEL_TRACES_EXPORTER: cloud-logging
-      BUPA_NODE_URL: ~{bs-bupa-srv-api/srv-url}
+      BUPA_NODE_URL: ~{bookshop-bupa-srv-api/srv-url}
     build-parameters:
       builder: custom
       commands:
         - mvn clean package -DskipTests=true
       build-result: target/*-exec.jar
     requires:
-      - name: bs-hdi-container-otel
-      - name: bs-uaa-otel
-      - name: bs-bupa-srv-api
-      - name: bs-cloud-logging
+      - name: bookshop-hdi-container-otel
+      - name: bookshop-uaa-otel
+      - name: bookshop-bupa-srv-api
+      - name: bookshop-application-logs
+      - name: bookshop-cloud-logging
     provides:
       - name: srv-api
         properties:
@@ -110,30 +112,35 @@ modules:
 # --------------------- RESOURCES ---------------------
 resources:
   # -----------------------------------------------------
-  - name: bs-uaa-otel
+  - name: bookshop-uaa-otel
     type: org.cloudfoundry.managed-service
     parameters:
       service: xsuaa
       service-plan: application
       path: ./xs-security.json
       config: # override xsappname as it needs to be unique
-        xsappname: bs-otel-${org}-${space}
+        xsappname: bookshop-otel-${org}-${space}
         oauth2-configuration:
           redirect-uris:
             - ~{app-api/app-url}/**
     requires:
       - name: app-api
-  - name: bs-hdi-container-otel
+  - name: bookshop-hdi-container-otel
     type: org.cloudfoundry.managed-service
     parameters:
       service: hana
       service-plan: hdi-shared
-  - name: bs-bupa-hdi-container-otel
+  - name: bookshop-bupa-hdi-container-otel
     type: org.cloudfoundry.managed-service
     parameters:
       service: hana
       service-plan: hdi-shared
-  - name: bs-cloud-logging
+  - name: bookshop-application-logs
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: application-logs
+      service-plan: lite
+  - name: bookshop-cloud-logging
     type: org.cloudfoundry.managed-service
     parameters:
       service: cloud-logging
