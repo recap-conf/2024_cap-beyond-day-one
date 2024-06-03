@@ -4,6 +4,10 @@ rm -rf **/mta_archives
 
 mbt build && cf deploy mta_archives/bs-recap-ws_1.0.0.mtar
 
+cf l --origin avpxtt84j-platform -a https://api.cf.eu12.hana.ondemand.com
+mbt build
+cf deploy mta_archives/bs-recap-ws_1.0.0.mtar
+
 
 
 TODOs:
