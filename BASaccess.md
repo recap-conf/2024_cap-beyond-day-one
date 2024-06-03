@@ -11,42 +11,42 @@ You can access the BTP subaccount [here](https://canary.cockpit.btp.int.sap/cock
 
 The logon credentials will be provided by the workshop hosts.
 
-![alt text](image.png)
+![alt text](assets/readmeImages/image.png)
 
 Click on `reCAPWorkshop` to open the Subaccount.
 
-![alt text](image-1.png)
+![alt text](assets/readmeImages/image-1.png)
 
 Select `Instances and Subscriptions` and click on `SAP Business Application Studio` 
 
-![alt text](image-2.png)
+![alt text](assets/readmeImages/image-2.png)
 
 Select `avpxtt84j.accounts400.ondemand.com` 
 
-![alt text](image-3.png)
+![alt text](assets/readmeImages/image-3.png)
 
 Select `Create Dev Space`
 
-![alt text](image-4.png)
+![alt text](assets/readmeImages/image-4.png)
 
 Enter a name of your choice (e.g. `dev`) in the fieldunder `Create a New Dev Space`, select the radio button for `Full Stack Cloud Application` and click on `Create Dev Space`
 
-![alt text](image-5.png)
+![alt text](assets/readmeImages/image-5.png)
 
 Wait until the `Dev space` is in status `RUNNING` and click on it, which will bring you here:
 
-![alt text](image-6.png)
+![alt text](assets/readmeImages/image-6.png)
 
 Click `OK` and choose the `Explorer View`: <img src="image-8.png" alt="drawing" width="30"/> in the icon menu on the left-hand side
 
-![alt text](image-7.png)
+![alt text](assets/readmeImages/image-7.png)
 
 Select `Clone Repository` and enter the URL of this repository: https://github.com/recap-conf/2024_cap-beyond-day-one.git
 
 When asked to choose a folder to clone, select `projects` under `/home/user/projects` and confirm with `OK`
 
-![alt text](image-9.png)
+![alt text](assets/readmeImages/image-9.png)
 
 Click on `Open`
 
-![alt text](image-10.png)
+![alt text](assets/readmeImages/image-10.png)
