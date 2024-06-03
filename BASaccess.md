@@ -42,3 +42,11 @@ Click `OK` and choose the `Explorer View`: <img src="image-8.png" alt="drawing" 
 ![alt text](image-7.png)
 
 Select `Clone Repository` and enter the URL of this repository: https://github.com/recap-conf/2024_cap-beyond-day-one.git
+
+When asked to choose a folder to clone, select `projects` under `/home/user/projects` and confirm with `OK`
+
+![alt text](image-9.png)
+
+Click on `Open`
+
+![alt text](image-10.png)
