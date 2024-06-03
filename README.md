@@ -6,6 +6,7 @@
 
 
 ## BAS Access
+
 For this workshop, there are prepared test users for you. 
 Each user has its own *space* in a shared *BTP Subaccount*.
 Each user is assigned the *Subaccount Viewer* role, to be able to view the instances and subscriptions.
@@ -28,6 +29,7 @@ Select `Instances and Subscriptions` and click on `SAP Business Application Stud
 ![alt text](assets/readmeImages/image-2.png)
 
 Select `avpxtt84j.accounts400.ondemand.com` 
+
 
 ![alt text](assets/readmeImages/image-3.png)
 
