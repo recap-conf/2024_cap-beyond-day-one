@@ -45,7 +45,7 @@ Wait until the `Dev space` is in status `RUNNING` and click on it, which will br
 
 ![alt text](assets/readmeImages/image-6.png)
 
-Click `OK` and choose the `Explorer View`: <img src="image-8.png" alt="drawing" width="30"/> in the icon menu on the left-hand side
+Click `OK` and choose the `Explorer View`: <img src="assets/readmeImages/image-8.png" alt="drawing" width="30"/> in the icon menu on the left-hand side
 
 ![alt text](assets/readmeImages/image-7.png)
 
