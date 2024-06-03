@@ -101,8 +101,9 @@ public class AdminServiceAddressHandler implements EventHandler {
 	// Replicate chosen addresses from S/4 when filling orders
 	@Before(event = { CqnService.EVENT_CREATE, CqnService.EVENT_UPDATE, DraftService.EVENT_DRAFT_PATCH })
 	public void patchAddressId(EventContext context, Stream<Orders> orders) {
-		String businessPartner = context.getUserInfo().getAttributeValues("businessPartner").stream().findFirst()
-			.orElseThrow(() -> new ServiceException(ErrorStatuses.FORBIDDEN, MessageKeys.BUPA_MISSING));
+		String businessPartner = "10401010";
+		// String businessPartner = context.getUserInfo().getAttributeValues("businessPartner").stream().findFirst()
+		// 	.orElseThrow(() -> new ServiceException(ErrorStatuses.FORBIDDEN, MessageKeys.BUPA_MISSING));
 
 		orders.filter(o -> o.getShippingAddressId() != null).forEach(order -> {
 			String addressId = order.getShippingAddressId();
