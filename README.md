@@ -102,6 +102,6 @@ In some cases, we want to see if the outbox is configured correctly and the even
 
 ![alt text](assets/readmeImages/dashboard-7.png)
 
-In the Outbox section, you will find the outbox history the audit log event that was processed by the outbox . You can repeat it or create a custom outbox event to see how it behaves:
+In the outbox section, you will find in the outbox history the audit log event that was processed by the outbox. You can repeat it or create a new custom outbox event to see how it behaves:
 
 ![alt text](assets/readmeImages/dashboard-8.png)
