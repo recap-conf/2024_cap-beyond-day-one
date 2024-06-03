@@ -4,12 +4,11 @@
 
 ![alt text](assets/scenario.png)
 
-
 ## BAS Access
 
-For this workshop, there are prepared test users for you. 
-Each user has its own *space* in a shared *BTP Subaccount*.
-Each user is assigned the *Subaccount Viewer* role, to be able to view the instances and subscriptions.
+For this workshop, there are prepared test users for you.
+Each user has its own _space_ in a shared _BTP Subaccount_.
+Each user is assigned the _Subaccount Viewer_ role, to be able to view the instances and subscriptions.
 Also each user is entitled to use the Business Application Studio (BAS).
 We recommend using BAS as development environment, as all the tools are automatically installed and up to date there.
 Please note however, that the account will be deleted after the workshop, so if you want to save your project you will need to connect to your github or download it.
@@ -24,12 +23,11 @@ Click on `reCAPWorkshop` to open the Subaccount.
 
 ![alt text](assets/readmeImages/image-1.png)
 
-Select `Instances and Subscriptions` and click on `SAP Business Application Studio` 
+Select `Instances and Subscriptions` and click on `SAP Business Application Studio`
 
 ![alt text](assets/readmeImages/image-2.png)
 
-Select `avpxtt84j.accounts400.ondemand.com` 
-
+Select `avpxtt84j.accounts400.ondemand.com`
 
 ![alt text](assets/readmeImages/image-3.png)
 
@@ -64,16 +62,38 @@ Click on `Open`
 1. open terminal via (Hamburger) Menu &rarr; Terminal &rarr; New Terminal
 1. log-in to cf via `cf l --origin avpxtt84j-platform -a https://api.cf.eu12.hana.ondemand.com`
 1. build multi-target app via `mbt build`
-2. deploy multi-target app `cf deploy mta_archives/bookshop-recap-ws_1.0.0.mtar`
-
+1. deploy multi-target app `cf deploy mta_archives/bookshop-recap-ws_1.0.0.mtar`
 
 ![alt text](assets/terminal.png)
 
-
 ## Logging
-
 
 ## Traces (OpenTelemetry)
 
-
 ## Dashboard
+
+As you can see, [AdminServiceAddressHandler](https://github.com/recap-conf/2024_cap-beyond-day-one/blob/3fec65729c8693dc47c5c4784f11f961939285a5/srv/src/main/java/my/bookshop/handlers/AdminServiceAddressHandler.java#L126) defines a handler for an incoming messaging event which is responsible for the addresses replication from the remote service to the local persistence. Since in our case the remote service does not emit any events, we can use the `Developer Dashboard` to simulate the `BusinessPartnerChanged` event to test the implementation.
+
+You can open the `Developer Dashboard` via the `Welcome Page` of the `Java Application`:
+
+![alt text](assets/readmeImages/dashboard-1.png)
+
+Open the Dashboard UI link to get in:
+
+![alt text](assets/readmeImages/dashboard-1.png)
+
+In the messaging section of the `Dashboard`, we see the `bupa-messaging` service, which offers a subscription to our `BusinessPartnerChanged` event:
+
+![alt text](assets/readmeImages/dashboard-3.png)
+
+Click on the `RECEIVE` button and set the `BusinessPartner` to `10401010`:
+
+![alt text](assets/readmeImages/dashboard-4.png)
+
+Finally confirm and you will find in the logs the output of the custom handler:
+
+![alt text](assets/readmeImages/dashboard-5.png)
+
+You can now check whether the data has been persisted in the persistence section of the `Dashboard`:
+
+![alt text](assets/readmeImages/dashboard-6.png)
