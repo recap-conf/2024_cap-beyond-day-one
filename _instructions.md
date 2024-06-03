@@ -2,7 +2,6 @@ TODOs:
 - make app etc. names unique before deploying? or at least their routes (or make random)?
 - overall architecture diagram?
 - setup ias for auth in cloud logging, such that basic creds from binding don't need to be used?
-- otel creds configured?
 
 ## OpenTelemetry
 
