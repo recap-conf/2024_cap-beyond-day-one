@@ -80,7 +80,7 @@ Prerequisites:
 Deploy as Single Tenant Application:
 - Run `mbt build`
 - Run `cf login`
-- Run `cf deploy mta_archives/bs-recap-ws_1.0.0.mtar`
+- Run `cf deploy mta_archives/bookshop-recap-ws_1.0.0.mtar`
 
 
 # Get Support
