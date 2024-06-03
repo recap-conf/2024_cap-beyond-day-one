@@ -78,11 +78,11 @@ You can open the `Developer Dashboard` via the `Welcome Page` of the `Java Appli
 
 ![alt text](assets/readmeImages/dashboard-1.png)
 
-Open the Dashboard UI link to get in:
+Open the `Dashboard UI` link to get in:
 
-![alt text](assets/readmeImages/dashboard-1.png)
+![alt text](assets/readmeImages/dashboard-2.png)
 
-In the messaging section of the `Dashboard`, we see the `bupa-messaging` service, which offers a subscription to our `BusinessPartnerChanged` event:
+In the messaging section of the dashboard, we see the `bupa-messaging` service, which offers a subscription to our `BusinessPartnerChanged` event:
 
 ![alt text](assets/readmeImages/dashboard-3.png)
 
@@ -90,10 +90,10 @@ Click on the `RECEIVE` button and set the `BusinessPartner` to `10401010`:
 
 ![alt text](assets/readmeImages/dashboard-4.png)
 
-Finally confirm and you will find in the logs the output of the custom handler:
+Finally confirm and you will find the logs of the custom handler in the dashboard console:
 
 ![alt text](assets/readmeImages/dashboard-5.png)
 
-You can now check whether the data has been persisted in the persistence section of the `Dashboard`:
+You can now check whether the data has been persisted in the persistence section of the dashboard:
 
 ![alt text](assets/readmeImages/dashboard-6.png)
