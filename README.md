@@ -105,3 +105,5 @@ In some cases, we want to see if the outbox is configured correctly and the even
 In the outbox section, you will find in the outbox history the audit log event that was processed by the outbox. You can repeat it or create a new custom outbox event to see how it behaves:
 
 ![alt text](assets/readmeImages/dashboard-8.png)
+
+![Was the tutorial cap to the mark? Let us know!](https://forms.office.com/Pages/ResponsePage.aspx?id=bGf3QlX0PEKC9twtmXka914n6hNKFVlPml6fyiE6QrxUNjY5NzhKQUxPUVMxNDdQNDNXQ1NMQUc0Vi4u)
