@@ -7,8 +7,6 @@ mbt build && cf deploy mta_archives/bs-recap-ws_1.0.0.mtar
 
 
 TODOs:
-- make app etc. names unique before deploying? or at least their routes (or make random)?
-- overall architecture diagram?
 - setup ias for auth in cloud logging, such that basic creds from binding don't need to be used?
 
 ## Overview
