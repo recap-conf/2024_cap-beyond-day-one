@@ -1,3 +1,5 @@
+using {User} from '@sap/cds/common';
+
 context db {
   entity A_BusinessPartnerAddress {
     key BusinessPartner : String(10);
@@ -7,5 +9,7 @@ context db {
         PostalCode      : String(10);
         StreetName      : String(60);
         HouseNumber     : String(10);
+        readAt          : Timestamp;
+        readBy          : User;
   }
 }
