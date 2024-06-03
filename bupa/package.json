@@ -1,0 +1,46 @@
+{
+  "name": "bupa",
+  "version": "1.0.0",
+  "description": "A simple CAP project.",
+  "repository": "<Add your repository here>",
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {
+    "@cap-js/hana": "^0.4.0",
+    "@cap-js/telemetry": "^0.2.0",
+    "@grpc/grpc-js": "^1.10.1",
+    "@opentelemetry/exporter-metrics-otlp-grpc": "^0.49.1",
+    "@opentelemetry/exporter-trace-otlp-grpc": "^0.49.1",
+    "@opentelemetry/host-metrics": "^0.35.0",
+    "@sap/cds": "^7",
+    "express": "^4"
+  },
+  "devDependencies": {
+    "@cap-js/sqlite": "^1",
+    "@sap/cds-dk": "^7"
+  },
+  "scripts": {
+    "start": "cds-serve"
+  },
+  "cds": {
+    "requires": {
+      "auth": {
+        "kind": "mocked",
+        "users": {
+          "admin": {
+            "roles": [
+              "admin",
+              "system-user"
+            ]
+          }
+        }
+      },
+      "[production]": {
+        "db": "hana",
+        "telemetry": {
+          "kind": "to-cloud-logging"
+        }
+      }
+    }
+  }
+}

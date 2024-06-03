@@ -1,0 +1,18 @@
+AddressID;BusinessPartner;Country;CityName;PostalCode;StreetName;HouseNumber
+100;10401010;DE;Walldorf;69190;Dietmar-Hopp-Allee;16
+101;10401010;DE;Walldorf;69190;Hasso-Plattner-Ring;7
+200;10401010;DE;St.Leon-Rot;68789;SAP-Allee;29
+300;10401010;DE;Potsdam;14469;Konrad-Zuse-Ring;10
+400;10401010;DE;Berlin;10557;George-Stephenson-Straße;7-13
+500;10401010;DE;Dresden;01067;Postplatz;1
+600;10401010;DE;Eschborn;65760;Frankfurter Straße;1
+700;10401010;DE;St. Ingbert;66386;Neue Bahnhofstraße;21
+800;10401010;DE;Hallbergmoos;85399;Zeppelinstraße;2
+900;10401010;DE;Ratingen;40882;SAP-Platz;1
+901;10401010;DE;Gerlingen;70839;Dieselstraße;5
+902;10401010;DE;Hamburg;20148;Tesdorpfstraße;8
+903;10401010;DE;Hannover;30655;Roderbruchstraße;19-21
+904;10401010;DE;Markdorf;88677;Dornierstraße;3
+905;10401010;DE;Schönefeld;12529;Mittelstraße;5/5a
+400;1000020;US;Newtown Square;19073;West Chester Pike;3999
+500;1000020;US;Palo Alto;94304;Hillview Avenue;3410

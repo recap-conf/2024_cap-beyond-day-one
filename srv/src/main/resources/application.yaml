@@ -1,0 +1,86 @@
+---
+logging:
+  level:
+    "[com.sap.cds.otel.span.RequestContext]": INFO
+spring:
+  web.resources.static-locations: "file:./app"
+  jmx:
+    enabled: true
+cds:
+  odata-v4.endpoint.path: "/api"
+  odata-v4.serializer.enabled: true
+  security:
+    mock.users:
+      admin:
+        password: admin
+        roles:
+          - admin
+        attributes:
+          businessPartner:
+            - "10401010"
+      user:
+        password: user
+server.servlet.encoding:
+  charset: UTF-8
+  force: true
+management:
+  endpoint:
+    health:
+      show-components: always
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: "health, metrics, beans"
+  health:
+    defaults.enabled: false
+    ping.enabled: true
+    db.enabled: true
+    myhealth.enabled: true
+
+---
+spring:
+  config.activate.on-profile: cloud
+  sql.init.schema-locations: "classpath:schema-nomocks.sql"
+cds:
+  messaging.services:
+    bupa-messaging:
+      kind: file-based-messaging
+      format: cloudevents
+
+---
+spring:
+  config.activate.on-profile: cap-node
+bupa.node.url: https://cdsnode-cdsjavaruntime-bupa-srv-otel.cfapps.sap.hana.ondemand.com
+cds:
+  remote.services:
+    "[API_BUSINESS_PARTNER]":
+      destination:
+        type: "odata-v4"
+        service: "sap/opu/odata/sap"
+        name: local-bp-node
+
+---
+spring:
+  config.activate.on-profile: local
+cds:
+  messaging.services:
+    messsging:
+      enabled: true
+      kind: "file-based-messaging"
+      binding: "/Users/d040506/git/samples/recap/recap_demo/srv/src/main/resources/messaging.txt"
+  remote.services:
+    "[API_BUSINESS_PARTNER]":
+      destination:
+        type: "odata-v4"
+        properties:
+          url: "http://localhost:4004/sap/opu/odata/sap"
+        headers:
+          Authorization: Basic YWRtaW46YWRtaW4=
+
+---
+spring:
+  config.activate.on-profile: default
+cds:
+  data-source:
+    auto-config.enabled: false

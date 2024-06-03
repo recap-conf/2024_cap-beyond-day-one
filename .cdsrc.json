@@ -1,0 +1,13 @@
+{
+    "requires": {
+        "multitenancy": false,
+        "extensibility": false,
+        "toggles": false
+    },
+    "build": {
+        "target": "."
+    },
+    "profiles": [
+        "java"
+    ]
+}

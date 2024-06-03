@@ -1,0 +1,34 @@
+@clientid=sb-bookshop-otel-cdsnode-cds-recap!t1581
+@clientsecret=L1KrBiW5UFLLeuQ1XhZlEjOmXzg=
+### Request Token
+# @name request_token
+POST https://cdsnode.authentication.sap.hana.ondemand.com/oauth/token
+Content-Type: application/x-www-form-urlencoded
+Authorization: Basic {{clientid}}:{{clientsecret}}
+
+grant_type=client_credentials&client_id=sb-bookshop-otel-cdsnode-cds-recap!t1581
+
+### Read (proxied) Business Partners
+GET https://cdsnode-cds-recap-bookshop-srv-otel.cfapps.sap.hana.ondemand.com/api/admin/Addresses
+Authorization: Bearer {{request_token.response.body.access_token}}
+
+### $batch
+POST https://cdsnode-cds-recap-bookshop-srv-otel.cfapps.sap.hana.ondemand.com/api/admin/$batch
+Authorization: Bearer {{request_token.response.body.access_token}}
+Content-Type: multipart/mixed; boundary=batch_8194-cf13-1f56
+
+--batch_8194-cf13-1f56
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+GET Orders HTTP/1.1
+
+
+--batch_8194-cf13-1f56
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+GET Addresses HTTP/1.1
+
+
+--batch_8194-cf13-1f56--
