@@ -96,11 +96,11 @@ Press *Create*, enter an order number, select a shipping address (Again, the val
 
 ### Logs
 
-Open the Application Logging Service dashboard via the service instances list in BTP Cloud Cockpit.
+Open the Application Logging Service dashboard via the service instances list in BTP Cloud Cockpit. Use origin `avpxtt84j-platform`.
 
 ![alt text](assets/readmeImages/open_application_logs.png)
 
-In the *Application Logs* section, find the log with message "Delegating GET Addresses to S/4 service", which was triggered by you opening the shipping address value help dialog. On that log entry, add a filter for the `correlation_id` (press the + button). Now you only see all requests and logs that belong to that value help request.
+In the *Application Logs* section (tab *Requests and Logs*), find the log with message "Delegating GET Addresses to S/4 service", which was triggered by you opening the shipping address value help dialog. On that log entry, add a filter for the `correlation_id` (press the + button). Now you only see all requests and logs that belong to that value help request.
 
 ![alt text](assets/readmeImages/correlation_id.png)
 
